@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Stock Support</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:#0b1220;
+  color:#fff;
+}
+
+header{
+  padding:28px 20px 20px;
+  background:linear-gradient(135deg,#111827,#1f2937);
+  border-bottom:1px solid #273449;
+}
+
+.logo{
+  font-size:28px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.logo span{
+  color:#4ade80;
+}
+
+.sub{
+  margin-top:6px;
+  color:#94a3b8;
+  font-size:13px;
+}
+
+main{
+  max-width:900px;
+  margin:auto;
+  padding:22px 16px 50px;
+}
+
+.market{
+  background:linear-gradient(135deg,#172033,#101827);
+  border:1px solid #26344d;
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+
+.market-title{
+  font-size:13px;
+  color:#94a3b8;
+}
+
+.price{
+  font-size:34px;
+  font-weight:800;
+  margin-top:8px;
+}
+
+.up{
+  color:#4ade80;
+  font-weight:700;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:18px;
+}
+
+.card{
+  background:#111827;
+  border:1px solid #26344d;
+  border-radius:16px;
+  padding:18px 14px;
+  min-height:130px;
+}
+
+.icon{
+  font-size:26px;
+}
+
+.card h3{
+  margin:12px 0 5px;
+  font-size:16px;
+}
+
+.card p{
+  margin:0;
+  font-size:12px;
+  color:#94a3b8;
+  line-height:1.6;
+}
+
+.search{
+  margin-top:20px;
+  background:#111827;
+  border:1px solid #26344d;
+  border-radius:16px;
+  padding:16px;
+}
+
+.search h2{
+  font-size:17px;
+  margin:0 0 12px;
+}
+
+.search-box{
+  display:flex;
+  gap:8px;
+}
+
+input{
+  flex:1;
+  min-width:0;
+  padding:13px;
+  border:none;
+  border-radius:10px;
+  background:#1e293b;
+  color:#fff;
+  font-size:16px;
+  outline:none;
+}
+
+button{
+  border:none;
+  border-radius:10px;
+  padding:0 18px;
+  background:#22c55e;
+  color:#07130b;
+  font-weight:800;
+  font-size:14px;
+}
+
+footer{
+  text-align:center;
+  color:#64748b;
+  font-size:11px;
+  padding:25px;
+}
+
+@media(min-width:700px){
+  .grid{
+    grid-template-columns:repeat(4,1fr);
+  }
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+  <div class="logo">STOCK <span>SUPPORT</span></div>
+  <div class="sub">株価・チャート・投資情報をシンプルに</div>
+</header>
+
+<main>
+
+  <section class="market">
+    <div class="market-title">MARKET DASHBOARD</div>
+    <div class="price">¥ 38,500</div>
+    <div class="up">▲ +1.25%</div>
+  </section>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="icon">📈</div>
+      <h3>チャート分析</h3>
+      <p>株価の動きやトレンドをチェック</p>
+    </div>
+
+    <div class="card">
+      <div class="icon">🔍</div>
+      <h3>銘柄検索</h3>
+      <p>気になる日本株・米国株を検索</p>
+    </div>
+
+    <div class="card">
+      <div class="icon">⭐</div>
+      <h3>ウォッチリスト</h3>
+      <p>気になる銘柄をまとめて管理</p>
+    </div>
+
+    <div class="card">
+      <div class="icon">🤖</div>
+      <h3>AI分析</h3>
+      <p>ニュースやチャートを分析</p>
+    </div>
+
+  </div>
+
+  <section class="search">
+    <h2>銘柄を検索</h2>
+
+    <div class="search-box">
+      <input type="text" placeholder="例：7203 / AAPL">
+      <button>検索</button>
+    </div>
+
+  </section>
+
+</main>
+
+<footer>
+  STOCK SUPPORT © 2026
+</footer>
+
+</body>
+</html>
