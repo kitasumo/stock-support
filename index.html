@@ -1,220 +1,346 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Stock Support</title>
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>パチンコ収支帳</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Roboto+Mono:wght@500;700&display=swap">
 <style>
-*{
-  box-sizing:border-box;
+/* Layout: one column ledger — 期間チップ → 収支サマリー → 累計グラフ → 記録一覧 → 機種別。記録は下から出るシート */
+:root{
+  --bg:#f3f2ee; --surface:#ffffff; --ink:#1d1f2a; --muted:#6b6d7a; --line:#e1dfd8;
+  --gold:#b8860b; --plus:#d0342c; --minus:#2b5fb8; --chip:#ebe8df;
+  --display:"Dela Gothic One","Hiragino Sans","Yu Gothic",sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --num:"Roboto Mono",ui-monospace,monospace;
 }
-
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:#0b1220;
-  color:#fff;
-}
-
-header{
-  padding:28px 20px 20px;
-  background:linear-gradient(135deg,#111827,#1f2937);
-  border-bottom:1px solid #273449;
-}
-
-.logo{
-  font-size:28px;
-  font-weight:800;
-  letter-spacing:1px;
-}
-
-.logo span{
-  color:#4ade80;
-}
-
-.sub{
-  margin-top:6px;
-  color:#94a3b8;
-  font-size:13px;
-}
-
-main{
-  max-width:900px;
-  margin:auto;
-  padding:22px 16px 50px;
-}
-
-.market{
-  background:linear-gradient(135deg,#172033,#101827);
-  border:1px solid #26344d;
-  border-radius:18px;
-  padding:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);
-}
-
-.market-title{
-  font-size:13px;
-  color:#94a3b8;
-}
-
-.price{
-  font-size:34px;
-  font-weight:800;
-  margin-top:8px;
-}
-
-.up{
-  color:#4ade80;
-  font-weight:700;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-top:18px;
-}
-
-.card{
-  background:#111827;
-  border:1px solid #26344d;
-  border-radius:16px;
-  padding:18px 14px;
-  min-height:130px;
-}
-
-.icon{
-  font-size:26px;
-}
-
-.card h3{
-  margin:12px 0 5px;
-  font-size:16px;
-}
-
-.card p{
-  margin:0;
-  font-size:12px;
-  color:#94a3b8;
-  line-height:1.6;
-}
-
-.search{
-  margin-top:20px;
-  background:#111827;
-  border:1px solid #26344d;
-  border-radius:16px;
-  padding:16px;
-}
-
-.search h2{
-  font-size:17px;
-  margin:0 0 12px;
-}
-
-.search-box{
-  display:flex;
-  gap:8px;
-}
-
-input{
-  flex:1;
-  min-width:0;
-  padding:13px;
-  border:none;
-  border-radius:10px;
-  background:#1e293b;
-  color:#fff;
-  font-size:16px;
-  outline:none;
-}
-
-button{
-  border:none;
-  border-radius:10px;
-  padding:0 18px;
-  background:#22c55e;
-  color:#07130b;
-  font-weight:800;
-  font-size:14px;
-}
-
-footer{
-  text-align:center;
-  color:#64748b;
-  font-size:11px;
-  padding:25px;
-}
-
-@media(min-width:700px){
-  .grid{
-    grid-template-columns:repeat(4,1fr);
-  }
-}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12131b; --surface:#1c1e29; --ink:#ecebe6; --muted:#9a9cab; --line:#2c2f3d;
+  --gold:#e0b44a; --plus:#ff6b5e; --minus:#6f9dff; --chip:#262938; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12131b; --surface:#1c1e29; --ink:#ecebe6; --muted:#9a9cab; --line:#2c2f3d;
+  --gold:#e0b44a; --plus:#ff6b5e; --minus:#6f9dff; --chip:#262938; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 120px}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:400;font-size:1.6rem;margin:0;letter-spacing:.02em;text-wrap:balance}
+h1 small{display:block;font-family:var(--body);font-size:.75rem;color:var(--gold);letter-spacing:.2em;font-weight:700}
+h2{font-size:.8rem;letter-spacing:.15em;color:var(--muted);margin:0 0 10px;font-weight:700}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:0;background:var(--chip);color:var(--ink);font:inherit;font-size:.85rem;padding:6px 14px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:700}
+.chip:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+.plus{color:var(--plus)} .minus{color:var(--minus)} .zero{color:var(--muted)}
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.big{font-family:var(--display);font-size:clamp(2.2rem,9vw,3.2rem);line-height:1.1;font-variant-numeric:tabular-nums}
+.big .yen{font-size:.45em;margin-left:4px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;border-top:1px solid var(--line);padding-top:14px}
+.kpi span{display:block;font-size:.72rem;color:var(--muted);letter-spacing:.08em}
+.kpi b{font-family:var(--num);font-size:1rem;font-variant-numeric:tabular-nums}
+@media (max-width:480px){.kpis{grid-template-columns:repeat(2,1fr);row-gap:12px}}
+.sample-note{font-size:.8rem;background:var(--chip);border-radius:8px;padding:8px 12px;color:var(--muted)}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--num);font-size:10px}
+.list{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;font:inherit;color:inherit;text-align:left;width:100%}
+.row:hover{background:var(--chip)}
+.d{font-family:var(--num);font-size:.8rem;color:var(--muted);line-height:1.3}
+.d b{display:block;font-size:1.05rem;color:var(--ink)}
+.m{min-width:0}
+.m b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m span{font-size:.78rem;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.amt{font-family:var(--num);font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.amt small{display:block;font-weight:500;font-size:.72rem;color:var(--muted)}
+.empty{color:var(--muted);padding:16px 4px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{padding:8px 4px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{font-size:.72rem;color:var(--muted);font-weight:700;letter-spacing:.08em}
+td{font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto}
+.fab{position:fixed;right:max(20px,calc(env(safe-area-inset-right,0px) + 20px));bottom:calc(env(safe-area-inset-bottom,0px) + 20px);
+  background:var(--gold);color:#1d1f2a;border:0;font:inherit;font-weight:700;font-size:1rem;padding:14px 22px;border-radius:999px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.sheet-bg{position:fixed;inset:0;background:rgba(10,10,20,.5);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:560px;border-radius:18px 18px 0 0;max-height:92vh;overflow-y:auto;
+  padding:20px max(20px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 20px) max(20px,env(safe-area-inset-left,0px))}
+.sheet h3{font-family:var(--display);font-weight:400;font-size:1.2rem;margin:0 0 14px}
+form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:flex;flex-direction:column;gap:4px;font-size:.78rem;color:var(--muted);font-weight:700;min-width:0}
+label.full{grid-column:1/-1}
+input,select{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;width:100%;min-width:0}
+.preview{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;background:var(--chip);border-radius:10px;padding:10px 14px}
+.preview b{font-family:var(--display);font-weight:400;font-size:1.5rem}
+.actions{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.btn{font:inherit;font-weight:700;border-radius:10px;padding:10px 18px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.danger{color:var(--plus);margin-right:auto}
+.status{font-size:.78rem;color:var(--muted)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 84px);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:.85rem;z-index:30}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .22s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.6}}}
 </style>
-
 </head>
-
 <body>
 
-<header>
-  <div class="logo">STOCK <span>SUPPORT</span></div>
-  <div class="sub">株価・チャート・投資情報をシンプルに</div>
-</header>
+<div class="wrap">
+  <header>
+    <h1><small>PACHINKO LEDGER</small>パチンコ収支帳</h1>
+    <div class="chips" id="periods" role="group" aria-label="期間">
+      <button class="chip" data-p="month" aria-pressed="true">今月</button>
+      <button class="chip" data-p="last">先月</button>
+      <button class="chip" data-p="year">今年</button>
+      <button class="chip" data-p="all">全期間</button>
+    </div>
+  </header>
 
-<main>
+  <div id="sampleNote" class="sample-note" hidden>表示中はサンプルデータです。右下の「＋ 記録する」で最初の1件を入れると、あなたの記録に切り替わります。</div>
 
-  <section class="market">
-    <div class="market-title">MARKET DASHBOARD</div>
-    <div class="price">¥ 38,500</div>
-    <div class="up">▲ +1.25%</div>
+  <section class="hero" aria-label="収支サマリー">
+    <div>
+      <h2 id="periodLabel">今月の収支</h2>
+      <div class="big" id="total">±0<span class="yen">円</span></div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><span>稼働</span><b id="kDays">0日</b></div>
+      <div class="kpi"><span>勝率</span><b id="kWin">—</b></div>
+      <div class="kpi"><span>総投資</span><b id="kIn">0</b></div>
+      <div class="kpi"><span>日平均</span><b id="kAvg">—</b></div>
+    </div>
+    <svg class="chart" id="chart" viewBox="0 0 640 180" role="img" aria-label="累計収支の推移"></svg>
   </section>
 
-  <div class="grid">
+  <section>
+    <h2>記録</h2>
+    <div class="list" id="list"></div>
+  </section>
 
-    <div class="card">
-      <div class="icon">📈</div>
-      <h3>チャート分析</h3>
-      <p>株価の動きやトレンドをチェック</p>
+  <section>
+    <h2>機種別</h2>
+    <div class="tbl"><table><thead><tr><th>機種</th><th>回数</th><th>勝</th><th>収支</th></tr></thead><tbody id="byMachine"></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>月別</h2>
+    <div class="tbl"><table><thead><tr><th>月</th><th>稼働</th><th>投資</th><th>回収</th><th>収支</th></tr></thead><tbody id="byMonth"></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>バックアップ</h2>
+    <div class="actions" style="justify-content:flex-start">
+      <button type="button" class="btn" id="expBtn">バックアップを保存</button>
+      <label class="btn" style="flex-direction:row;font-size:inherit;color:var(--ink)">読み込む<input type="file" id="impFile" accept=".json,application/json" hidden></label>
     </div>
+  </section>
+  <p class="status" id="status">読み込み中…</p>
+</div>
 
-    <div class="card">
-      <div class="icon">🔍</div>
-      <h3>銘柄検索</h3>
-      <p>気になる日本株・米国株を検索</p>
-    </div>
+<button class="fab" id="addBtn">＋ 記録する</button>
 
-    <div class="card">
-      <div class="icon">⭐</div>
-      <h3>ウォッチリスト</h3>
-      <p>気になる銘柄をまとめて管理</p>
-    </div>
-
-    <div class="card">
-      <div class="icon">🤖</div>
-      <h3>AI分析</h3>
-      <p>ニュースやチャートを分析</p>
-    </div>
-
+<div class="sheet-bg" id="sheetBg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h3 id="sheetTitle">記録する</h3>
+    <form id="form">
+      <label>日付<input type="date" id="fDate" required></label>
+      <label>種別
+        <select id="fRate">
+          <option>4円パチ</option><option>1円パチ</option><option>0.5円パチ</option>
+          <option>20円スロ</option><option>5円スロ</option><option>その他</option>
+        </select>
+      </label>
+      <label class="full">店舗<input id="fStore" list="storeList" placeholder="例：マルハン新宿東宝ビル" autocomplete="off"></label>
+      <label class="full">機種<input id="fMachine" list="machineList" placeholder="例：e花の慶次" autocomplete="off" required></label>
+      <label>投資（円）<input type="number" id="fIn" inputmode="numeric" min="0" step="500" placeholder="0" required></label>
+      <label>回収（円）<input type="number" id="fOut" inputmode="numeric" min="0" step="100" placeholder="0" required></label>
+      <label class="full">メモ<input id="fMemo" placeholder="例：大当たり8回、RUSH 3回" autocomplete="off"></label>
+      <div class="preview"><span>収支</span><b id="fBal" class="zero">±0円</b></div>
+      <div class="actions">
+        <button type="button" class="btn danger" id="delBtn" hidden>削除</button>
+        <button type="button" class="btn" id="cancelBtn">閉じる</button>
+        <button type="submit" class="btn primary" id="saveBtn">保存</button>
+      </div>
+    </form>
+    <datalist id="storeList"></datalist><datalist id="machineList"></datalist>
   </div>
+</div>
+<div class="toast" id="toast" hidden></div>
 
-  <section class="search">
-    <h2>銘柄を検索</h2>
+<script>
+const $ = id => document.getElementById(id);
+const SAMPLE = (() => {
+  const t = new Date(); const y = t.getFullYear(), m = t.getMonth();
+  const d = (mo, day) => { const x = new Date(y, m + mo, day); return x.toISOString().slice(0,10); };
+  return [
+    {id:"s1",date:d(0,Math.min(3,t.getDate())),store:"サンプル店A",machine:"e花の慶次",rate:"4円パチ",in:18000,out:42300,memo:"サンプル"},
+    {id:"s2",date:d(0,Math.min(5,t.getDate())),store:"サンプル店A",machine:"Pエヴァ",rate:"4円パチ",in:25000,out:0,memo:"サンプル"},
+    {id:"s3",date:d(-1,12),store:"サンプル店B",machine:"スマスロ北斗",rate:"20円スロ",in:30000,out:51200,memo:"サンプル"},
+    {id:"s4",date:d(-1,20),store:"サンプル店B",machine:"e花の慶次",rate:"4円パチ",in:12000,out:8600,memo:"サンプル"},
+    {id:"s5",date:d(-2,8),store:"サンプル店A",machine:"Pエヴァ",rate:"1円パチ",in:5000,out:9800,memo:"サンプル"}
+  ];
+})();
 
-    <div class="search-box">
-      <input type="text" placeholder="例：7203 / AAPL">
-      <button>検索</button>
-    </div>
+let records = [];     // user's real records
+let period = "month";
+let editing = null;
+let store = { save: async()=>{throw 0}, remove: async()=>{throw 0} }; // 接続完了まで
+let usingSample = true;
 
-  </section>
+const yen = n => (n>0?"+":n<0?"−":"±") + Math.abs(n).toLocaleString("ja-JP");
+const cls = n => n>0?"plus":n<0?"minus":"zero";
+const bal = r => (r.out||0) - (r.in||0);
 
-</main>
+function inPeriod(r){
+  const t = new Date(); const y=t.getFullYear(), m=t.getMonth();
+  const [ry, rm] = r.date.split("-").map(Number);
+  if (period==="month") return ry===y && rm-1===m;
+  if (period==="last"){ const l=new Date(y,m-1,1); return ry===l.getFullYear() && rm-1===l.getMonth(); }
+  if (period==="year") return ry===y;
+  return true;
+}
+const LABEL = {month:"今月の収支",last:"先月の収支",year:"今年の収支",all:"全期間の収支"};
 
-<footer>
-  STOCK SUPPORT © 2026
-</footer>
+function render(){
+  const data = (usingSample ? SAMPLE : records).slice().sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
+  $("sampleNote").hidden = !usingSample;
+  const rows = data.filter(inPeriod);
+  const total = rows.reduce((s,r)=>s+bal(r),0);
+  const days = new Map(); rows.forEach(r=>days.set(r.date,(days.get(r.date)||0)+bal(r)));
+  const wins = [...days.values()].filter(v=>v>0).length;
+  $("periodLabel").textContent = LABEL[period];
+  $("total").className = "big " + cls(total);
+  $("total").innerHTML = yen(total) + '<span class="yen">円</span>';
+  $("kDays").textContent = days.size + "日";
+  $("kWin").textContent = days.size ? Math.round(wins/days.size*100) + "%" : "—";
+  $("kIn").textContent = rows.reduce((s,r)=>s+(r.in||0),0).toLocaleString("ja-JP");
+  const avg = days.size ? Math.round(total/days.size) : null;
+  $("kAvg").textContent = avg===null ? "—" : yen(avg);
+  $("kAvg").className = avg===null ? "" : cls(avg);
+  drawChart(rows);
 
+  const list = $("list"); list.textContent = "";
+  if (!rows.length){ const p=document.createElement("p"); p.className="empty"; p.textContent="この期間の記録はまだありません。"; list.append(p); }
+  rows.forEach(r=>{
+    const b = document.createElement("button"); b.className="row"; b.type="button";
+    const [,mm,dd] = r.date.split("-"); const wd = "日月火水木金土"[new Date(r.date+"T00:00").getDay()];
+    b.innerHTML = `<div class="d"><b>${+mm}/${+dd}</b>${wd}曜</div><div class="m"><b></b><span></span></div><div class="amt ${cls(bal(r))}">${yen(bal(r))}<small>投資 ${(r.in||0).toLocaleString("ja-JP")}</small></div>`;
+    b.querySelector(".m b").textContent = r.machine;
+    b.querySelector(".m span").textContent = [r.rate, r.store, r.memo].filter(Boolean).join(" · ");
+    b.onclick = () => openSheet(r);
+    list.append(b);
+  });
+
+  const mach = new Map();
+  rows.forEach(r=>{ const k=r.machine; const v=mach.get(k)||{n:0,w:0,s:0}; v.n++; if(bal(r)>0)v.w++; v.s+=bal(r); mach.set(k,v); });
+  $("byMachine").innerHTML = [...mach].sort((a,b)=>b[1].s-a[1].s).map(([k,v])=>
+    `<tr><td>${esc(k)}</td><td>${v.n}</td><td>${v.w}</td><td class="num ${cls(v.s)}">${yen(v.s)}</td></tr>`).join("") || `<tr><td colspan="4" class="empty">—</td></tr>`;
+
+  const mon = new Map();
+  data.forEach(r=>{ const k=r.date.slice(0,7); const v=mon.get(k)||{d:new Set(),i:0,o:0}; v.d.add(r.date); v.i+=r.in||0; v.o+=r.out||0; mon.set(k,v); });
+  $("byMonth").innerHTML = [...mon].sort((a,b)=>a[0]<b[0]?1:-1).map(([k,v])=>{
+    const s=v.o-v.i; const [y,m]=k.split("-");
+    return `<tr><td>${y}年${+m}月</td><td>${v.d.size}日</td><td class="num">${v.i.toLocaleString("ja-JP")}</td><td class="num">${v.o.toLocaleString("ja-JP")}</td><td class="num ${cls(s)}">${yen(s)}</td></tr>`;
+  }).join("") || `<tr><td colspan="5" class="empty">—</td></tr>`;
+
+  const stores=[...new Set(records.map(r=>r.store).filter(Boolean))], machines=[...new Set(records.map(r=>r.machine).filter(Boolean))];
+  $("storeList").innerHTML = stores.map(s=>`<option value="${esc(s)}">`).join("");
+  $("machineList").innerHTML = machines.map(s=>`<option value="${esc(s)}">`).join("");
+}
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function niceStep(range){ const raw=range/4; const p=Math.pow(10,Math.floor(Math.log10(raw||1))); const n=raw/p; return (n<=1?1:n<=2?2:n<=5?5:10)*p; }
+function drawChart(rows){
+  const svg=$("chart"); const W=640,H=180,L=56,R=12,T=12,B=24;
+  const asc = rows.slice().sort((a,b)=>a.date<b.date?-1:1);
+  let c=0; const pts=[0]; asc.forEach(r=>{c+=bal(r);pts.push(c);});
+  if (asc.length<1){ svg.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle">記録が入るとここに累計グラフが出ます</text>`; return; }
+  let lo=Math.min(0,...pts), hi=Math.max(0,...pts); if(hi===lo){hi+=10000;lo-=10000;}
+  const st=niceStep(hi-lo); lo=Math.floor(lo/st)*st; hi=Math.ceil(hi/st)*st;
+  const x=i=>L+(W-L-R)*(i/(pts.length-1)); const y=v=>T+(H-T-B)*(1-(v-lo)/(hi-lo));
+  let g="";
+  for(let v=lo; v<=hi+1e-6; v+=st){ g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="${v===0?1.5:1}" ${v===0?'':'stroke-dasharray="2 4"'}/><text x="${L-6}" y="${y(v)+3}" text-anchor="end">${v===0?"0":(v/10000).toLocaleString("ja-JP")+"万"}</text>`; }
+  const line = pts.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const end = pts[pts.length-1]; const col = end>=0?"var(--plus)":"var(--minus)";
+  const area = `${x(0)},${y(0)} ${line} ${x(pts.length-1)},${y(0)}`;
+  const first=asc[0].date.slice(5).replace("-","/"), last=asc[asc.length-1].date.slice(5).replace("-","/");
+  g+=`<polygon points="${area}" fill="${col}" opacity=".12"/><polyline points="${line}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  g+=`<circle cx="${x(pts.length-1)}" cy="${y(end)}" r="4.5" fill="${col}"/>`;
+  g+=`<text x="${L}" y="${H-6}">${first.replace(/^0/,"")}</text><text x="${W-R}" y="${H-6}" text-anchor="end">${last.replace(/^0/,"")}</text>`;
+  svg.innerHTML=g;
+}
+
+/* ---- sheet ---- */
+function openSheet(r){
+  if (r && usingSample){ toast("サンプルは編集できません。新しく記録してください"); return; }
+  editing = r||null;
+  $("sheetTitle").textContent = r ? "記録を編集" : "記録する";
+  $("fDate").value = r ? r.date : new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+  $("fRate").value = r ? r.rate : (records[0]?.rate || "4円パチ");
+  $("fStore").value = r ? r.store : (latest()?.store || "");
+  $("fMachine").value = r ? r.machine : "";
+  $("fIn").value = r ? r.in : ""; $("fOut").value = r ? r.out : ""; $("fMemo").value = r ? (r.memo||"") : "";
+  $("delBtn").hidden = !r; $("delBtn").textContent="削除"; $("delBtn").dataset.arm="";
+  updPreview(); $("sheetBg").hidden=false; setTimeout(()=>$(r?"fIn":"fMachine").focus(),50);
+}
+const latest = () => records.slice().sort((a,b)=>a.date<b.date?1:-1)[0];
+function closeSheet(){ $("sheetBg").hidden=true; editing=null; }
+function updPreview(){ const v=(+$("fOut").value||0)-(+$("fIn").value||0); $("fBal").textContent=yen(v)+"円"; $("fBal").className=cls(v); }
+["fIn","fOut"].forEach(i=>$(i).addEventListener("input",updPreview));
+$("addBtn").onclick=()=>openSheet(null);
+$("cancelBtn").onclick=closeSheet;
+$("sheetBg").addEventListener("click",e=>{ if(e.target===$("sheetBg")) closeSheet(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !$("sheetBg").hidden) closeSheet(); });
+
+$("form").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const rec = { id: editing?.id || ("r"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+    date:$("fDate").value, rate:$("fRate").value, store:$("fStore").value.trim(), machine:$("fMachine").value.trim(),
+    in:Math.max(0,+$("fIn").value||0), out:Math.max(0,+$("fOut").value||0), memo:$("fMemo").value.trim() };
+  if(!rec.date||!rec.machine){ toast("日付と機種を入れてください"); return; }
+  $("saveBtn").disabled=true;
+  try{ await store.save(rec); upsertLocal(rec); usingSample=false; closeSheet(); toast(editing?"更新しました":"保存しました"); render(); }
+  catch(err){ toast("保存できませんでした。通信を確認してもう一度お試しください"); }
+  finally{ $("saveBtn").disabled=false; }
+});
+$("delBtn").onclick = async ()=>{
+  const b=$("delBtn");
+  if(!b.dataset.arm){ b.dataset.arm="1"; b.textContent="本当に削除"; return; }
+  try{ await store.remove(editing.id); records=records.filter(r=>r.id!==editing.id); usingSample=!records.length; closeSheet(); toast("削除しました"); render(); }
+  catch{ toast("削除できませんでした"); }
+};
+function upsertLocal(rec){ const i=records.findIndex(r=>r.id===rec.id); if(i>=0) records[i]=rec; else records.push(rec); }
+
+$("periods").addEventListener("click",e=>{ const b=e.target.closest(".chip"); if(!b) return;
+  period=b.dataset.p; document.querySelectorAll("#periods .chip").forEach(c=>c.setAttribute("aria-pressed", c===b)); render(); });
+
+let tt; function toast(m){ const t=$("toast"); t.textContent=m; t.hidden=false; clearTimeout(tt); tt=setTimeout(()=>t.hidden=true,2400); }
+
+$("expBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify(records,null,1)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="pachinko-"+new Date().toISOString().slice(0,10)+".json"; document.body.append(a); a.click(); a.remove();
+};
+$("impFile").onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{ const arr=JSON.parse(await f.text()); if(!Array.isArray(arr)) throw 0;
+    for(const r of arr){ if(r&&r.id&&r.date&&r.machine) await localStore.save(r); }
+    records=localStore.load(); usingSample=!records.length; render(); toast(arr.length+"件を読み込みました");
+  }catch{ toast("読み込めませんでした。バックアップのファイルを選んでください"); }
+  e.target.value="";
+};
+/* ---- storage: クラウド保存（db）→ 使えないときはこのブラウザ内 ---- */
+const LS="pachinko-ledger-v1";
+const localStore = {
+  load(){ try{ return JSON.parse(localStorage.getItem(LS)||"[]"); }catch{ return []; } },
+  async save(rec){ const a=this.load().filter(r=>r.id!==rec.id); a.push(rec); try{ localStorage.setItem(LS,JSON.stringify(a)); }catch{ throw new Error("ls"); } },
+  async remove(id){ try{ localStorage.setItem(LS,JSON.stringify(this.load().filter(r=>r.id!==id))); }catch{ throw new Error("ls"); } }
+};
+function useLocal(msg){
+  store=localStore; records=localStore.load(); usingSample=!records.length;
+  $("status").textContent=msg; render();
+}
+useLocal("記録はこのスマホ（ブラウザ）内に保存されます。機種変更の前は「バックアップ」で保存しておいてください。");
+</script>
 </body>
 </html>
